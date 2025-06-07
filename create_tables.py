@@ -1,6 +1,7 @@
 import os
 import time
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 # Pastikan kita mengimpor Base dan semua model Anda
 # agar SQLAlchemy tahu tabel apa saja yang harus dibuat.
@@ -9,6 +10,9 @@ from src.models.db_models import Request, Result, User
 
 # Ambil URL database dari environment variable yang sama
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def create_db_tables():
     """
@@ -27,6 +31,21 @@ def create_db_tables():
             Base.metadata.create_all(bind=engine)
             print("Tables created successfully!")
             # Inisialisasi user default
+            print("Seeding initial data...")
+            db = SessionLocal() # Buat sesi database baru
+            
+            # Cek apakah user default sudah ada
+            user_exists = db.query(User).filter_by(id=1).first()
+            if not user_exists:
+                # Jika belum ada, buat user default
+                default_user = User(id=1, name="Default User", email="default@user.com")
+                db.add(default_user)
+                db.commit()
+                print("Default user created.")
+            else:
+                print("Default user already exists.")
+            
+            db.close()
             # (Anda bisa menambahkan logika ini jika perlu)
             print("Database tables are ready.")
             break

@@ -1,7 +1,7 @@
 # Dockerfile
 
 # 1. Gunakan base image Python yang ringan
-FROM python:3.9-slim
+FROM python:3.9
 
 # 2. Set direktori kerja di dalam kontainer
 WORKDIR /app

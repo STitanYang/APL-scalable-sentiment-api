@@ -7,21 +7,32 @@ This project is a FastAPI application that provides a RESTful API for sentiment 
 ```
 sentiment-api
 ├── src
-│   ├── main.py                # Entry point for the FastAPI application
 │   ├── api
 │   │   └── v1
-│   │       └── sentiment.py   # API endpoints for sentiment analysis
+│   │       └── sentiment.py      # API endpoints for sentiment analysis
 │   ├── services
 │   │   └── huggingface_client.py # Handles communication with Hugging Face API
 │   ├── models
-│   │   └── sentiment.py       # Data models for sentiment analysis results
+│   │   └── sentiment.py          # Data models for sentiment analysis results
 │   ├── schemas
-│   │   └── sentiment.py       # Pydantic schemas for request and response validation
+│   │   └── sentiment.py          # Pydantic schemas for request and response validation
 │   └── utils
-│       └── __init__.py       # Utility functions and classes
-├── requirements.txt           # Project dependencies
-├── README.md                  # Project documentation
-└── .env                       # Environment variables
+│       └── __init__.py           # Utility functions and classes
+├── requirements.txt              # Project dependencies
+├── README.md                     # Project documentation
+├── venv                          # Virtual Environment
+├── .env                          # Environment variables
+├── main.py                       # Entry point for the FastAPI application
+├── create_tables.py              # Creating Tables in database
+├── fastapi-deployment.yaml       # Deployment of fastapi in docker
+├── fastapi-service.yaml          # Service of fastapi in docker
+├── postgres-deployment.yaml      # Deployment of postgres in docker
+├── postgres-pvc.yaml             # PVC of postgres in docker
+├── postgres-jog.yaml             # Job to tables in docker 
+├── postgres-secret.yaml          # Secret username and password of postgres in docker
+├── postgres-service.yaml         # Service of postgres in docker
+├── redis-deployment.yaml         # Deployment of redis in docker
+├── redis-service.yaml            # Service of redis in docker
 ```
 
 ## Setup Instructions
@@ -37,25 +48,58 @@ sentiment-api
    python -m venv venv
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
+   
+3. Create a `.env` file in the root directory and add your secret:
+   ```
+   HUGGINGFACE_API_KEY=your_api_key
+   MODEL_NAME=your_model_name
+   DATABASE_URL=your_database_url
+   ```
 
-3. Install the required dependencies:
+4. Start Minikube:
    ```
-   pip install -r requirements.txt
+   minikube start
    ```
 
-4. Create a `.env` file in the root directory and add your Hugging Face API key:
+5. Change your CLI directly to kubernetes:
    ```
-   HUGGINGFACE_API_KEY=your_api_key_here
+   eval $(minikube -p minikube docker-env)
+   ```
+
+6. Build the docker:
+   ```
+   docker build -t sentiment-api:latest .
+   ```
+
+7. Deploy Redis:
+   ```
+   kubectl apply -f redis-deployment.yaml
+   kubectl apply -f redis-service.yaml
+   ```
+
+8. Deploy the Load Balancer:
+   ```
+   kubectl apply -f fastapi-deployment.yaml
+   kubectl apply -f fastapi-service.yaml
+   ```
+
+9. Deploy the Postgres
+   ```
+   kubectl apply -f postgres-secret.yaml
+   kubectl apply -f postgres-deployment.yaml
+   kubectl apply -f postgres-service.yaml
+   kubectl apply -f postgres-pvc.yaml
+   kubectl apply -f postgres-job.yaml
    ```
 
 ## Usage
 
 To run the FastAPI application, execute the following command:
 ```
-uvicorn src.main:app --reload
+minikube service fastapi-service
 ```
 
-You can access the API documentation at `http://127.0.0.1:8000/docs`.
+You can access the API from the given port after running the command above
 
 ## API Endpoints
 

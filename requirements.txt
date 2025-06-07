@@ -1,0 +1,9 @@
+FastAPI
+uvicorn
+pydantic
+requests
+sqlalchemy
+dotenv
+psycopg2-binary
+redis
+fastapi-cache2[redis]

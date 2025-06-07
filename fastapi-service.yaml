@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-service
+spec:
+  type: LoadBalancer # <-- Tipe ini akan membuat IP eksternal yang bisa diakses
+  selector:
+    app: fastapi-sentiment
+  ports:
+    - protocol: TCP
+      port: 80 # Port yang akan diakses dari luar
+      targetPort: 8000 # Port tempat Uvicorn berjalan di dalam kontainer

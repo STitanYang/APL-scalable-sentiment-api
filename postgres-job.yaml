@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-create-tables-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-creator
+        image: sentiment-api:v1.1 # <-- Kita pakai image yang sama dengan aplikasi utama
+        imagePullPolicy: IfNotPresent
+        # Ganti perintah default dengan perintah untuk menjalankan script kita
+        command: ["python", "create_tables.py"]
+        envFrom:
+        - secretRef:
+            name: fastapi-secrets # <-- Ambil env vars dari secret yang sama
+      # Pastikan job tidak di-restart setelah selesai atau gagal
+      restartPolicy: Never
+  backoffLimit: 2 # Coba ulang maksimal 2 kali jika gagal
